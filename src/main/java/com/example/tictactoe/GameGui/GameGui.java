@@ -9,6 +9,8 @@ public class GameGui {
     private final GameDataBase gameDataBase;
     private final InputValidation inputValidation = new InputValidation();
 
+    private final int firstPlayer = 0;
+
     public GameGui(GameDataBase gameDataBase) {
         this.gameDataBase = gameDataBase;
     }
@@ -20,7 +22,7 @@ public class GameGui {
 
     public void collectNecessaryInformationAboutThePlayer(int whichPlayer) {
         gameDataBase.addPlayerToList(new Player());
-        if (whichPlayer == 0) {
+        if (whichPlayer == firstPlayer) {
             printGreetingForFirstPlayer();
             askThePlayerForHisName(whichPlayer);
             askThePlayerForTheGamePieceHeWantsUse();
@@ -46,7 +48,7 @@ public class GameGui {
 
     private void askThePlayerForTheGamePieceHeWantsUse() {
         String playerName = gameDataBase.getPlayerName(0);
-        System.out.println("Bardzo milo mi Ciebie poznac " + playerName + ". Tak wiec kolejne pytanie " +
+        System.out.println("Bardzo milo mi Ciebie poznac " + playerName + ". Tak wiec kolejne pytanie" +
                 " jak i przywilej pierwszego gracza ;) Jakim znakiem chcesz zagrac masz do wyboru X lub O ?");
         savePlayerGamePieceInDataBase(0);
     }
@@ -79,15 +81,52 @@ public class GameGui {
                 "tak wiec zagrasz " + secondPlayerGamePiece);
     }
 
-    // dodac enumerator albo zmienna ktora opisuje numer gracza
+    public void askForAnOpponent() {
+        System.out.println("Dobrze wiec z kim chcesz zagrac? Wprowadz jedn z opcji 1 - Gracz, 2 - Komputer");
+        saveSelectedOpponentInDataBase();
+    }
 
+    public void askIfPlayerIsSureAboutOpponent(){
+        System.out.println("Czy jestes pewien wybranego przeciwnika? Wybierz Y - Yes lub N - No ");
+        inputValidation.takeFromPlayerDecisionAboutOpponent();
+    }
 
-/*    public void askAboutBoardSize() {
+    public void answerThePlayerDecisions(){
+        if (isPlayerSureAboutOpponent()){
+            System.out.println("Rozumiem w takim razie pozostalo nam ustalic ostatnia rzecz przed gra i bedzie mozna zaczac zabawe ");
+            gameDataBase.setOpponentHasBeenSelected(isPlayerSureAboutOpponent());
+        }else {
+            System.out.println("W takim razie jeszcze raz spytam ");
+            gameDataBase.setOpponentHasBeenSelected(isPlayerSureAboutOpponent());
+        }
+    }
+
+    private boolean isPlayerSureAboutOpponent(){
+        return inputValidation.getApprovedAnswerYOrN().contains("Y");
+    }
+
+    private void saveSelectedOpponentInDataBase(){
+        inputValidation.takeFromPlayerSelectedOpponent();
+        String selectedOpponent = inputValidation.getApprovedSelectedOpponent();
+        if (selectedOpponent.contains("1")){
+            gameDataBase.setSelectedOpponent(selectedOpponent);
+        }else {
+            gameDataBase.setSelectedOpponent(selectedOpponent);
+        }
+    }
+
+    public void askAboutBoardSize() {
         System.out.println("W takimi razie prosze teraz zdecydowac o rozmiarze planszy masz dwie opcje \n" +
                 "1. Plansza 3x3 na ktorej trzeba miec w rzedzie 3 znaki zeby wygrac \n" +
                 "2. Plansza 5x5 na ktorej trzeba miec w rzedzie 5 znakow zeby wygrac \n" +
                 "Wpisz w konsole 1 lub 2 aby dokonac wyboru.");
-        gameDataBase.setSelectedBoard(inputValidation.get);
-    }*/
+        saveSelectedBoardSizeByPlayerInDataBase();
+    }
+
+    private void saveSelectedBoardSizeByPlayerInDataBase() {
+        inputValidation.takeFromPlayerBoardSize();
+        String selectedBoardSize = inputValidation.getApprovedSelectedBoardSize();
+        gameDataBase.setSelectedBoard(selectedBoardSize);
+    }
 
 }
