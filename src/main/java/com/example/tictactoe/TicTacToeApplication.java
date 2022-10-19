@@ -1,9 +1,9 @@
 package com.example.tictactoe;
 
 import com.example.tictactoe.GameDataBase.GameDataBase;
+import com.example.tictactoe.GameGui.Board;
 import com.example.tictactoe.GameGui.GameGui;
 import com.example.tictactoe.GameLogic.GameLogic;
-
 
 
 public class TicTacToeApplication {
@@ -12,7 +12,8 @@ public class TicTacToeApplication {
 
         GameDataBase gameDataBase = new GameDataBase();
         GameGui gameGui = new GameGui(gameDataBase);
-        GameLogic gameLogic = new GameLogic(gameDataBase,gameGui);
+        GameLogic gameLogic = new GameLogic(gameDataBase, gameGui);
+        Board board = new Board(gameDataBase);
 
 /*
         gameGui.printGreeting();
@@ -27,8 +28,30 @@ public class TicTacToeApplication {
 
         gameGui.askAboutBoardSize();
         gameLogic.prepareBoardForTheGame();
+        gameGui.printExplanationOfTheGame();
+        board.printInstructionBoard();
 
 
+        boolean isEnd;
+        gameDataBase.setRound("X");
+
+        do {
+
+            do {
+                gameGui.askPlayerToSelectSpaceOnTheBoard();
+                gameLogic.findSelectedSpaceInBoardArray();
+                if (gameLogic.isSelectedSpaceNotEmpty()) {
+                    gameGui.printInfoThatThisSpaceIsNotEmpty();
+                }
+
+            } while (gameLogic.isSelectedSpaceNotEmpty());
+
+            gameLogic.putPlayerFigureOnBoard(gameDataBase.getRound());
+            board.printMainBoard();
+            isEnd = gameLogic.isThePlayerWinTheGame();
+
+            gameLogic.changeTurn();
+        } while (!isEnd);
     }
 
 }

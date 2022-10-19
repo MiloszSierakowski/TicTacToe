@@ -8,14 +8,16 @@ import java.util.List;
 public class GameDataBase {
     List<Player> playerList = new ArrayList<>();
     private String selectedOpponent;
-    private String selectedBoard;
+    private String selectedBoardSize;
     private final int first = 0;
     private final int second = 1;
     private boolean isOpponentHasBeenSelected = false;
     private final int SIZE_OF_SMALL_BOARD = 3;
     private final int SIZE_OF_BIG_BOARD = 5;
-
-    List<String> board = new ArrayList<>();
+    String[][] instructionBoard;
+    String[][] mainBoard;
+    private int selectedSpaceOnTheBoard;
+    private String round;
 
     public void addPlayerToList(Player player) {
         playerList.add(player);
@@ -41,12 +43,12 @@ public class GameDataBase {
         this.selectedOpponent = selectedOpponent;
     }
 
-    public String getSelectedBoard() {
-        return selectedBoard;
+    public int getSelectedBoardSize() {
+        return Integer.parseInt(selectedBoardSize);
     }
 
-    public void setSelectedBoard(String selectedBoard) {
-        this.selectedBoard = selectedBoard;
+    public void setSelectedBoardSize(String selectedBoard) {
+        this.selectedBoardSize = selectedBoard;
     }
 
     public int getFirst() {
@@ -73,11 +75,35 @@ public class GameDataBase {
         return SIZE_OF_BIG_BOARD;
     }
 
-    public List<String> getBoard() {
-        return board;
+    public String[][] getInstructionBoard() {
+        return instructionBoard;
     }
 
-    public void setBoard(List<String> board) {
-        this.board = board;
+    public void setInstructionBoard(String[][] instructionBoard) {
+        this.instructionBoard = instructionBoard;
+    }
+
+    public String[][] getMainBoard() {
+        return mainBoard;
+    }
+
+    public void setMainBoard(String[][] mainBoard) {
+        this.mainBoard = mainBoard;
+    }
+
+    public int getSelectedSpaceOnTheBoard() {
+        return selectedSpaceOnTheBoard;
+    }
+
+    public void setSelectedSpaceOnTheBoard(int selectedSpaceOnTheBoard) {
+        this.selectedSpaceOnTheBoard = selectedSpaceOnTheBoard;
+    }
+
+    public String getRound() {
+        return round;
+    }
+
+    public void setRound(String round) {
+        this.round = round;
     }
 }

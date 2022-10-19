@@ -25,7 +25,7 @@ public class GameGui {
         if (whichPlayer == firstPlayer) {
             printGreetingForFirstPlayer();
             askThePlayerForHisName(whichPlayer);
-            askThePlayerForTheGamePieceHeWantsUse();
+            askThePlayerForTheGamePieceHeWantsUse(whichPlayer);
         } else {
             printGreetingForSecondPlayer();
             askThePlayerForHisName(whichPlayer);
@@ -46,11 +46,11 @@ public class GameGui {
         savePlayerNameInDataBase(whichPlayer);
     }
 
-    private void askThePlayerForTheGamePieceHeWantsUse() {
-        String playerName = gameDataBase.getPlayerName(0);
+    private void askThePlayerForTheGamePieceHeWantsUse(int whichPlayer) {
+        String playerName = gameDataBase.getPlayerName(whichPlayer);
         System.out.println("Bardzo milo mi Ciebie poznac " + playerName + ". Tak wiec kolejne pytanie" +
                 " jak i przywilej pierwszego gracza ;) Jakim znakiem chcesz zagrac masz do wyboru X lub O ?");
-        savePlayerGamePieceInDataBase(0);
+        savePlayerGamePieceInDataBase(whichPlayer);
     }
 
     private void savePlayerNameInDataBase(int whichPlayer) {
@@ -63,6 +63,7 @@ public class GameGui {
         inputValidation.takeFromPlayerHisGamePiece();
         String gamePiece = inputValidation.getApprovedPlayerGamePiece();
         gameDataBase.getPlayerFromList(whichPlayer).setGamePiece(gamePiece);
+        gameDataBase.setRound(gamePiece.toUpperCase());
     }
 
     private void saveSecondPlayerGamePieceInDataBase() {
@@ -86,47 +87,76 @@ public class GameGui {
         saveSelectedOpponentInDataBase();
     }
 
-    public void askIfPlayerIsSureAboutOpponent(){
+    public void askIfPlayerIsSureAboutOpponent() {
         System.out.println("Czy jestes pewien wybranego przeciwnika? Wybierz Y - Yes lub N - No ");
         inputValidation.takeFromPlayerDecisionAboutOpponent();
     }
 
-    public void answerThePlayerDecisions(){
-        if (isPlayerSureAboutOpponent()){
+    public void answerThePlayerDecisions() {
+        if (isPlayerSureAboutOpponent()) {
             System.out.println("Rozumiem w takim razie pozostalo nam ustalic ostatnia rzecz przed gra i bedzie mozna zaczac zabawe ");
             gameDataBase.setOpponentHasBeenSelected(isPlayerSureAboutOpponent());
-        }else {
+        } else {
             System.out.println("W takim razie jeszcze raz spytam ");
             gameDataBase.setOpponentHasBeenSelected(isPlayerSureAboutOpponent());
         }
     }
 
-    private boolean isPlayerSureAboutOpponent(){
+    private boolean isPlayerSureAboutOpponent() {
         return inputValidation.getApprovedAnswerYOrN().contains("Y");
     }
 
-    private void saveSelectedOpponentInDataBase(){
+    private void saveSelectedOpponentInDataBase() {
         inputValidation.takeFromPlayerSelectedOpponent();
         String selectedOpponent = inputValidation.getApprovedSelectedOpponent();
-        if (selectedOpponent.contains("1")){
+        if (selectedOpponent.contains("1")) {
             gameDataBase.setSelectedOpponent(selectedOpponent);
-        }else {
+        } else {
             gameDataBase.setSelectedOpponent(selectedOpponent);
         }
     }
 
     public void askAboutBoardSize() {
-        System.out.println("W takimi razie prosze teraz zdecydowac o rozmiarze planszy masz dwie opcje \n" +
-                "1. Plansza 3x3 na ktorej trzeba miec w rzedzie 3 znaki zeby wygrac \n" +
-                "2. Plansza 5x5 na ktorej trzeba miec w rzedzie 5 znakow zeby wygrac \n" +
-                "Wpisz w konsole 1 lub 2 aby dokonac wyboru.");
+        System.out.println("""
+                W takimi razie prosze teraz zdecydowac o rozmiarze planszy. Nasza plansza zawsze jest w ksztalcie kwadratu,\s
+                wiec nie trudno sie domyslic ze wystarczy podac tylko rozmiar jednego boku abysmy byli w stanie stworzyc dla\s
+                Ciebie plansze :) Wiec na jak duzej planszy chcesz grac? Tylko prosze bez przesady zaluzmy ze nie moze byc\s
+                mniejsza niz 3 (bo to nie mialo by sensu) i nie wieksza niz 20.""");
+
         saveSelectedBoardSizeByPlayerInDataBase();
     }
 
     private void saveSelectedBoardSizeByPlayerInDataBase() {
         inputValidation.takeFromPlayerBoardSize();
         String selectedBoardSize = inputValidation.getApprovedSelectedBoardSize();
-        gameDataBase.setSelectedBoard(selectedBoardSize);
+        gameDataBase.setSelectedBoardSize(selectedBoardSize);
     }
+
+    public void printExplanationOfTheGame() {
+        int boardSize = gameDataBase.getSelectedBoardSize();
+        System.out.println("Przy wyborze planszy " + boardSize + "x" + boardSize + " gramy dopuki" +
+                " jeden z graczy nie bedzie mial w rzedzie " + boardSize + " swoich znakow.\nPonierzej " +
+                "widac plansze ktora wybrales. Widac na niej numerki komorek ktore nalerzy wskazac zeby" +
+                " pojawila sie tam Twoj znak.\nNie pozostalo mi nic innego jak rzyczyc Tobie powodzenia " +
+                ":)\n");
+    }
+
+    public void askPlayerToSelectSpaceOnTheBoard() {
+        System.out.println("Prosze wpisz numer komorki gdzie mam ustawic Twoj znak? ");
+        saveSelectedSpaceOnTheBoard();
+    }
+
+    public void saveSelectedSpaceOnTheBoard() {
+        int boardSize = gameDataBase.getSelectedBoardSize();
+        inputValidation.takeFromPlayerSelectedSpaceOnTheBoard(boardSize);
+        int selectedSpaceOnTheBoard = inputValidation.getApprovedSelectedSpaceOnTheBoard();
+        gameDataBase.setSelectedSpaceOnTheBoard(selectedSpaceOnTheBoard);
+    }
+
+    public void printInfoThatThisSpaceIsNotEmpty(){
+        System.out.println("Wybacz ale tu znajduje sie juz figura sprobuj wybrac inne miejsce");
+    }
+
+
 
 }

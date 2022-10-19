@@ -8,15 +8,19 @@ public class InputValidation {
     private String gamePiece;
     private String playerName;
     private String selectedBoardSize;
+    private final int MINIMUM_BOARD_SIZE = 3;
+    private final int MAXIMUM_BARD_SIZE = 20;
     private String selectedOpponent;
     private String playerAnswerYOrN;
+    private String selectedSpaceOnTheBoard;
 
-    private String getPlayerName() {
-        return playerName;
-    }
 
     private String getGamePiece() {
         return gamePiece;
+    }
+
+    private String getPlayerName() {
+        return playerName;
     }
 
     private String getSelectedBoardSize() {
@@ -29,6 +33,10 @@ public class InputValidation {
 
     private String getPlayerAnswerYOrN() {
         return playerAnswerYOrN;
+    }
+
+    private String getSelectedSpaceOnTheBoard() {
+        return selectedSpaceOnTheBoard;
     }
 
     public void takeFromPlayerName() {
@@ -105,17 +113,46 @@ public class InputValidation {
             this.selectedBoardSize = scanner.nextLine();
 
             if (isSelectedBoardSizeNotReady()) {
-                System.out.println("Wpisales niewlasciwe wartosci prosze podaj 1 lub 2.");
+                System.out.println("Wpisales niewlasciwa wartosc prosze podaj wartosc z zakresu " + MINIMUM_BOARD_SIZE + "-" + MAXIMUM_BARD_SIZE);
             }
         } while (isSelectedBoardSizeNotReady());
     }
 
     private boolean isSelectedBoardSizeNotReady() {
-        return !getSelectedBoardSize().matches("[1-2]*") || getSelectedBoardSize().length() != 1;
+        if (getSelectedBoardSize().matches("[0-9]*") && getSelectedBoardSize().length() == 1) {
+
+            int boardSize = Integer.parseInt(getSelectedBoardSize());
+            return boardSize < MINIMUM_BOARD_SIZE || boardSize > MAXIMUM_BARD_SIZE;
+        }
+        return true;
     }
 
     public String getApprovedSelectedBoardSize() {
         return getSelectedBoardSize();
+    }
+
+    public void takeFromPlayerSelectedSpaceOnTheBoard(int boardSize) {
+        do {
+            this.selectedSpaceOnTheBoard = scanner.nextLine();
+
+            if (isSelectedSpaceOnTheBoardIsNotReady(boardSize)) {
+                System.out.println("Wpisana wartosc jest nie poprawna prosze sprobuj jeszcze raz");
+            }
+
+        } while (isSelectedSpaceOnTheBoardIsNotReady(boardSize));
+    }
+
+    private boolean isSelectedSpaceOnTheBoardIsNotReady(int boardSize) {
+
+        if (getSelectedSpaceOnTheBoard().matches("[0-9]*") && getSelectedSpaceOnTheBoard().length() >= 1) {
+            int spaceInBoard = Integer.parseInt(getSelectedSpaceOnTheBoard());
+            return spaceInBoard < 1 || spaceInBoard > (boardSize * boardSize);
+        }
+        return true;
+    }
+
+    public int getApprovedSelectedSpaceOnTheBoard() {
+        return Integer.parseInt(getSelectedSpaceOnTheBoard());
     }
 
 }
