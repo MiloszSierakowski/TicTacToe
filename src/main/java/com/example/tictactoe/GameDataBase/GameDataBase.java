@@ -1,6 +1,6 @@
 package com.example.tictactoe.GameDataBase;
 
-import com.example.tictactoe.Player;
+import com.example.tictactoe.Player.Player;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -12,27 +12,26 @@ public class GameDataBase {
     private final int first = 0;
     private final int second = 1;
     private boolean isOpponentHasBeenSelected = false;
-    private final int SIZE_OF_SMALL_BOARD = 3;
-    private final int SIZE_OF_BIG_BOARD = 5;
     String[][] instructionBoard;
     String[][] mainBoard;
+    private int numberOfSymbolsInLineToWin = 3 ;
     private int selectedSpaceOnTheBoard;
-    private String round;
+    private String symbolUsedThisRound;
 
     public void addPlayerToList(Player player) {
         playerList.add(player);
     }
 
-    public Player getPlayerFromList(int whichPlayer) {
-        return playerList.get(whichPlayer);
+    public Player getPlayerFromList(int whichPlayerFromList) {
+        return playerList.get(whichPlayerFromList);
     }
 
-    public String getPlayerName(int whichPlayer) {
-        return playerList.get(whichPlayer).getName();
+    public String getPlayerName(int whichPlayerFromList) {
+        return playerList.get(whichPlayerFromList).getName();
     }
 
-    public String getPlayerGamePiece(int whichPlayer) {
-        return playerList.get(whichPlayer).getGamePiece();
+    public String getPlayerSymbol(int whichPlayerFromList) {
+        return playerList.get(whichPlayerFromList).getSymbol();
     }
 
     public String getSelectedOpponent() {
@@ -63,16 +62,8 @@ public class GameDataBase {
         return isOpponentHasBeenSelected;
     }
 
-    public void setOpponentHasBeenSelected(boolean opponentHasBeenSelected) {
+    public void setIsOpponentHasBeenSelected(boolean opponentHasBeenSelected) {
         isOpponentHasBeenSelected = opponentHasBeenSelected;
-    }
-
-    public int getSIZE_OF_SMALL_BOARD() {
-        return SIZE_OF_SMALL_BOARD;
-    }
-
-    public int getSIZE_OF_BIG_BOARD() {
-        return SIZE_OF_BIG_BOARD;
     }
 
     public String[][] getInstructionBoard() {
@@ -91,6 +82,14 @@ public class GameDataBase {
         this.mainBoard = mainBoard;
     }
 
+    public int getNumberOfSymbolsInLineToWin() {
+        return numberOfSymbolsInLineToWin;
+    }
+
+    public void setNumberOfSymbolsInLineToWin(int numberOfSymbolsInLineToWin) {
+        this.numberOfSymbolsInLineToWin = numberOfSymbolsInLineToWin;
+    }
+
     public int getSelectedSpaceOnTheBoard() {
         return selectedSpaceOnTheBoard;
     }
@@ -99,11 +98,11 @@ public class GameDataBase {
         this.selectedSpaceOnTheBoard = selectedSpaceOnTheBoard;
     }
 
-    public String getRound() {
-        return round;
+    public String getSymbolUsedThisRound() {
+        return symbolUsedThisRound;
     }
 
-    public void setRound(String round) {
-        this.round = round;
+    public void setSymbolUsedThisRound(String symbolUsedThisRound) {
+        this.symbolUsedThisRound = symbolUsedThisRound;
     }
 }

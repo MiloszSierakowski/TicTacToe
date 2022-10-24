@@ -1,17 +1,26 @@
 package com.example.tictactoe.GameLogic;
 
 import com.example.tictactoe.GameDataBase.GameDataBase;
-import com.example.tictactoe.GameGui.GameGui;
+import com.example.tictactoe.Player.Computer;
+
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.Random;
+
 
 public class GameLogic {
     private final GameDataBase gameDataBase;
-    private final GameGui gameGui;
     private int foundRow;
     private int foundCol;
+    private final int FIRST_PLAYER_ON_LIST = 0;
+    private final int SECOND_PLAYER_ON_LIST = 1;
 
-    public GameLogic(GameDataBase gameDataBase, GameGui gameGui) {
+    private final String SYMBOL_X = "X";
+    private final String SYMBOL_O = "O";
+
+    public GameLogic(GameDataBase gameDataBase) {
         this.gameDataBase = gameDataBase;
-        this.gameGui = gameGui;
     }
 
     private int getFoundRow() {
@@ -20,6 +29,21 @@ public class GameLogic {
 
     private int getFoundCol() {
         return foundCol;
+    }
+
+    public boolean isOpponentAComputer() {
+        int selectedOpponent = Integer.parseInt(gameDataBase.getSelectedOpponent());
+        return selectedOpponent == 2;
+    }
+
+    public void addComputerAsPlayer() {
+        String symbol = gameDataBase.getPlayerSymbol(FIRST_PLAYER_ON_LIST);
+        gameDataBase.addPlayerToList(new Computer());
+        if (symbol.equals(SYMBOL_X)) {
+            gameDataBase.getPlayerFromList(SECOND_PLAYER_ON_LIST).setSymbol(SYMBOL_O);
+        } else {
+            gameDataBase.getPlayerFromList(SECOND_PLAYER_ON_LIST).setSymbol(SYMBOL_X);
+        }
     }
 
     public void prepareBoardForTheGame() {
@@ -39,6 +63,44 @@ public class GameLogic {
         gameDataBase.setMainBoard(mainBoard);
     }
 
+    public void chooseARandomSymbolThatStarts() {
+        Random random = new Random();
+        if ((random.nextInt(2) + 1) == 1) {
+            gameDataBase.setSymbolUsedThisRound(SYMBOL_X);
+        } else {
+            gameDataBase.setSymbolUsedThisRound(SYMBOL_O);
+        }
+    }
+
+    public boolean isComputerMove() {
+        if (gameDataBase.getPlayerFromList(SECOND_PLAYER_ON_LIST).getName().equals("Computer")) {
+            String symbolUsedThisRound = gameDataBase.getSymbolUsedThisRound();
+            String computerSymbol = gameDataBase.getPlayerSymbol(SECOND_PLAYER_ON_LIST);
+            return symbolUsedThisRound.equals(computerSymbol);
+        }
+        return false;
+    }
+
+    //---------------------------------------------------------------------------------- computer logic--------------------------------------------------
+    public void chooseSpaceOnBoardForComputer() {
+        Random random = new Random();
+
+        String[][] temporaryBoard = gameDataBase.getMainBoard();
+
+        List<String> availableSpacesOnBoard;
+
+        availableSpacesOnBoard = Arrays.stream(temporaryBoard)
+                .flatMap(Arrays::stream)
+                .filter(x-> !x.equals(SYMBOL_X) && !x.equals(SYMBOL_O))
+                .collect(Collectors.toList());
+
+        int chosenElementFromAvailableSpacesOnBoard = random.nextInt(availableSpacesOnBoard.size());
+        int chosenSpaceOnBoard = Integer.parseInt(availableSpacesOnBoard.get(chosenElementFromAvailableSpacesOnBoard));
+
+        gameDataBase.setSelectedSpaceOnTheBoard(chosenSpaceOnBoard);
+    }
+
+    //-------------------------------------------------------------------------------------------------------------------------------------------------------
     public void findSelectedSpaceInBoardArray() {
         String[][] mainBoard = gameDataBase.getMainBoard();
         String selectedSpaceOnBoard = Integer.toString(gameDataBase.getSelectedSpaceOnTheBoard());
@@ -54,122 +116,143 @@ public class GameLogic {
         }
     }
 
-    public boolean isSelectedSpaceNotEmpty() {
-        return gameDataBase.getMainBoard()[getFoundRow()][getFoundCol()].contains("X") ||
-                gameDataBase.getMainBoard()[getFoundRow()][getFoundCol()].contains("O");
+    public boolean isValidMove() {
+        return gameDataBase.getMainBoard()[getFoundRow()][getFoundCol()].contains(SYMBOL_X) ||
+                gameDataBase.getMainBoard()[getFoundRow()][getFoundCol()].contains(SYMBOL_O);
     }
 
-    public void putPlayerFigureOnBoard(String turn) {
+    public void placeMoveOnBoard(String turn) {
         gameDataBase.getMainBoard()[getFoundRow()][getFoundCol()] = turn;
     }
 
     public boolean isThePlayerWinTheGame() {
         String[][] mainBoard = gameDataBase.getMainBoard();
-        String round = gameDataBase.getRound();
-        String diagonallyToTheLeft;
-        String diagonallyToTheRight;
-        String horizontallyLine;
-        String verticallyLine;
-        boolean isEndGame = false;
-        String winLine = round + round + round;
+        String symbolUsedInThisRound = gameDataBase.getSymbolUsedThisRound();
+        int numberOfSymbolsInLineToWin = gameDataBase.getNumberOfSymbolsInLineToWin();
 
-        for (int i = 0; i < mainBoard.length; i++) {
-            for (int j = 0; j < mainBoard.length; j++) {
-                if (mainBoard[i][j].contains(round)) {
+        String winLine = createAWinningString(symbolUsedInThisRound, numberOfSymbolsInLineToWin);
 
-                    if (isItPossibleToWinDiagonallyInTheLowerLeftDirection(i, j)) {
-                        diagonallyToTheLeft = isPlayerWinByOrderFigureDiagonallyInTheLowerLeftDirection(i, j, mainBoard);
-                        if (winLine.equals(diagonallyToTheLeft)) {
-                            return true;
-                        }
-                    }
-                    if (isItPossibleToWinByOrderFigureVertically(i)) {
-                        verticallyLine = isPlayerWinByOrderFigureVertically(i, j, mainBoard);
-                        if (winLine.equals(verticallyLine)) {
-                            return true;
-                        }
-                    }
-                    if (isItPossibleToWinDiagonallyInTheLowerRightDirection(i, j)) {
-                        diagonallyToTheRight = isPlayerWinByOrderFigureDiagonallyInTheLowerRightDirection(i, j, mainBoard);
-                        if (winLine.equals(diagonallyToTheRight)) {
-                            return true;
-                        }
-                    }
-                    if (isItPossibleToWinByOrderFigureHorizontally(j)) {
-                        horizontallyLine = isPlayerWinByOrderFigureHorizontally(i, j, mainBoard);
-                        if (winLine.equals(horizontallyLine)) {
-                            return true;
-                        }
+        for (int row = 0; row < mainBoard.length; row++) {
+            for (int col = 0; col < mainBoard.length; col++) {
 
+                if (mainBoard[row][col].contains(symbolUsedInThisRound)) {
+
+                    if (isThePlayerWinningDiagonallyInTheLowerLeftDirection(row, col, winLine, numberOfSymbolsInLineToWin, mainBoard)) {
+                        return true;
+                    }
+
+                    if (isThePlayerWinningVertically(row, col, winLine, numberOfSymbolsInLineToWin, mainBoard)) {
+                        return true;
+                    }
+
+                    if (isThePlayerWinningDiagonallyInTheLowerRightDirection(row, col, winLine, numberOfSymbolsInLineToWin, mainBoard)) {
+                        return true;
+                    }
+
+                    if (isThePlayerWinningHorizontally(row, col, winLine, numberOfSymbolsInLineToWin, mainBoard)) {
+                        return true;
                     }
                 }
             }
         }
-        return isEndGame;
+        return false;
     }
 
-    private boolean isItPossibleToWinByOrderFigureHorizontally(int selectedCol) {
-        int boardSize = gameDataBase.getSelectedBoardSize();
-        int figuresInLineToWin = 3;
-        return boardSize - selectedCol >= figuresInLineToWin;
-    }
+    public boolean isADraw() {
+        String[][] temporaryBoard = gameDataBase.getMainBoard();
 
-    private boolean isItPossibleToWinByOrderFigureVertically(int selectedRow) {
-        int boardSize = gameDataBase.getSelectedBoardSize();
-        int figuresInLineToWin = 3;
-        return boardSize - selectedRow >= figuresInLineToWin;
-    }
+        List<String> availableSpacesOnBoard;
 
-    private boolean isItPossibleToWinDiagonallyInTheLowerLeftDirection(int selectedRow, int selectedCol) {
-        int boardSize = gameDataBase.getSelectedBoardSize();
-        int figuresInLineToWin = 3;
-        return boardSize - selectedRow >= figuresInLineToWin && selectedCol + 1 >= figuresInLineToWin;
-    }
+        availableSpacesOnBoard = Arrays.stream(temporaryBoard)
+                .flatMap(Arrays::stream)
+                .filter(x-> !x.equals(SYMBOL_X) && !x.equals(SYMBOL_O))
+                .collect(Collectors.toList());
 
-    private boolean isItPossibleToWinDiagonallyInTheLowerRightDirection(int selectedRow, int selectedCol) {
-        int boardSize = gameDataBase.getSelectedBoardSize();
-        int figuresInLineToWin = 3;
-        return boardSize - selectedRow >= figuresInLineToWin && boardSize - selectedCol >= figuresInLineToWin;
-    }
-
-    private String isPlayerWinByOrderFigureDiagonallyInTheLowerLeftDirection(int selectedRow, int selectedCol, String[][] mainBoard) {
-        int figuresInLineToWin = 3;
-        StringBuilder winLine = new StringBuilder();
-
-        for (int i = 0; i < figuresInLineToWin; i++) {
-            winLine.append(mainBoard[selectedRow + i][selectedCol - i]);
+        for (String s: availableSpacesOnBoard) {
+            if (!s.equals(SYMBOL_X) && !s.equals(SYMBOL_O)){
+                return false;
+            }
         }
-        return winLine.toString();
+        return true;
     }
 
-    private String isPlayerWinByOrderFigureHorizontally(int selectedRow, int selectedCol, String[][] mainBoard) {
-        int figuresInLineToWin = 3;
-        StringBuilder winLine = new StringBuilder();
-
-        for (int i = 0; i < figuresInLineToWin; i++) {
-            winLine.append(mainBoard[selectedRow][selectedCol + i]);
-        }
-        return winLine.toString();
+    private String createAWinningString(String SymbolUsedInThisRound, int symbolsInLineToWin) {
+        return String.valueOf(SymbolUsedInThisRound).repeat(Math.max(0, symbolsInLineToWin));
     }
 
-    private String isPlayerWinByOrderFigureVertically(int selectedRow, int selectedCol, String[][] mainBoard) {
-        int figuresInLineToWin = 3;
-        StringBuilder winLine = new StringBuilder();
+    private boolean isThePlayerWinningDiagonallyInTheLowerLeftDirection(int row, int col, String winLine, int numberOfSymbolsInLineToWin, String[][] mainBoard) {
+        if (isItPossibleToWinDiagonallyInTheLowerLeftDirection(row, col, numberOfSymbolsInLineToWin)) {
 
-        for (int i = 0; i < figuresInLineToWin; i++) {
-            winLine.append(mainBoard[selectedRow + i][selectedCol]);
+            StringBuilder diagonallyInTheLowerLeft = new StringBuilder();
+
+            for (int i = 0; i < numberOfSymbolsInLineToWin; i++) {
+                diagonallyInTheLowerLeft.append(mainBoard[row + i][col - i]);
+            }
+
+            return winLine.equals(diagonallyInTheLowerLeft.toString());
         }
-        return winLine.toString();
+        return false;
     }
 
-    private String isPlayerWinByOrderFigureDiagonallyInTheLowerRightDirection(int selectedRow, int selectedCol, String[][] mainBoard) {
-        int figuresInLineToWin = 3;
-        StringBuilder winLine = new StringBuilder();
+    private boolean isItPossibleToWinDiagonallyInTheLowerLeftDirection(int selectedRow, int selectedCol, int numberOfSymbolsInLineToWin) {
+        int boardSize = gameDataBase.getSelectedBoardSize();
+        return boardSize - selectedRow >= numberOfSymbolsInLineToWin && selectedCol + 1 >= numberOfSymbolsInLineToWin;
+    }
 
-        for (int i = 0; i < figuresInLineToWin; i++) {
-            winLine.append(mainBoard[selectedRow + i][selectedCol + i]);
+    private boolean isThePlayerWinningVertically(int row, int col, String winLine, int numberOfSymbolsInLineToWin, String[][] mainBoard) {
+        if (isItPossibleToWinByOrderSymbolVertically(row, numberOfSymbolsInLineToWin)) {
+
+            StringBuilder verticallyLine = new StringBuilder();
+
+            for (int i = 0; i < numberOfSymbolsInLineToWin; i++) {
+                verticallyLine.append(mainBoard[row + i][col]);
+            }
+            return winLine.equals(verticallyLine.toString());
         }
-        return winLine.toString();
+        return false;
+    }
+
+    private boolean isItPossibleToWinByOrderSymbolVertically(int selectedRow, int numberOfSymbolsInLineToWin) {
+        int boardSize = gameDataBase.getSelectedBoardSize();
+        return boardSize - selectedRow >= numberOfSymbolsInLineToWin;
+    }
+
+    private boolean isThePlayerWinningDiagonallyInTheLowerRightDirection(int row, int col, String winLine, int numberOfSymbolsInLineToWin, String[][] mainBoard) {
+
+        if (isItPossibleToWinDiagonallyInTheLowerRightDirection(row, col, numberOfSymbolsInLineToWin)) {
+
+            StringBuilder diagonallyInTheLowerRight = new StringBuilder();
+
+            for (int i = 0; i < numberOfSymbolsInLineToWin; i++) {
+                diagonallyInTheLowerRight.append(mainBoard[row + i][col + i]);
+            }
+
+            return winLine.equals(diagonallyInTheLowerRight.toString());
+        }
+        return false;
+    }
+
+    private boolean isItPossibleToWinDiagonallyInTheLowerRightDirection(int selectedRow, int selectedCol, int numberOfSymbolsInLineToWin) {
+        int boardSize = gameDataBase.getSelectedBoardSize();
+        return boardSize - selectedRow >= numberOfSymbolsInLineToWin && boardSize - selectedCol >= numberOfSymbolsInLineToWin;
+    }
+
+    private boolean isThePlayerWinningHorizontally(int row, int col, String winLine, int numberOfSymbolsInLineToWin, String[][] mainBoard) {
+        if (isItPossibleToWinByOrderSymbolHorizontally(col, numberOfSymbolsInLineToWin)) {
+
+            StringBuilder horizontallyLine = new StringBuilder();
+
+            for (int i = 0; i < numberOfSymbolsInLineToWin; i++) {
+                horizontallyLine.append(mainBoard[row][col + i]);
+            }
+            return winLine.equals(horizontallyLine.toString());
+        }
+        return false;
+    }
+
+    private boolean isItPossibleToWinByOrderSymbolHorizontally(int selectedCol, int numberOfSymbolsInLineToWin) {
+        int boardSize = gameDataBase.getSelectedBoardSize();
+        return boardSize - selectedCol >= numberOfSymbolsInLineToWin;
     }
 
 /*    public boolean isEndGame() {
@@ -178,11 +261,10 @@ public class GameLogic {
     }*/
 
     public void changeTurn() {
-        if (gameDataBase.getRound().contains("X")) {
-            gameDataBase.setRound("O");
+        if (gameDataBase.getSymbolUsedThisRound().contains("X")) {
+            gameDataBase.setSymbolUsedThisRound("O");
         } else {
-            gameDataBase.setRound("X");
+            gameDataBase.setSymbolUsedThisRound("X");
         }
     }
-
 }

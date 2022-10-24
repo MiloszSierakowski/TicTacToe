@@ -2,33 +2,36 @@ package com.example.tictactoe.GameGui;
 
 import com.example.tictactoe.GameDataBase.GameDataBase;
 import com.example.tictactoe.InputValidation.InputValidation;
-import com.example.tictactoe.Player;
+import com.example.tictactoe.Player.Person;
 
 public class GameGui {
 
     private final GameDataBase gameDataBase;
     private final InputValidation inputValidation = new InputValidation();
 
-    private final int firstPlayer = 0;
+    private final int FIRST_PLAYER_ON_LIST = 0;
+    private final int SECOND_PLAYER_ON_LIST = 1;
+
+    private final String SYMBOL_X = "X";
+    private final String SYMBOL_O = "O";
 
     public GameGui(GameDataBase gameDataBase) {
         this.gameDataBase = gameDataBase;
     }
 
     public void printGreeting() {
-        System.out.println("Witamy w grze w kolko i krzyzyk. Moja gra ma troche opcji wiec zanim " +
-                "zaczniemy chcialbym zadac Tobie pare pytan zajmnie to tylko chwile ;) ");
+        System.out.println("Witamy w grze w kolko i krzyzyk. Moja gra ma troche opcji wiec, zanim " +
+                "zaczniemy chcialbym zadac Tobie pare pytan zajmie to tylko chwile ;) ");
     }
 
-    public void collectNecessaryInformationAboutThePlayer(int whichPlayer) {
-        gameDataBase.addPlayerToList(new Player());
-        if (whichPlayer == firstPlayer) {
+    public void collectNecessaryInformationAboutThePlayer(int whichPlayerOnList) {
+        if (whichPlayerOnList == FIRST_PLAYER_ON_LIST) {
             printGreetingForFirstPlayer();
-            askThePlayerForHisName(whichPlayer);
-            askThePlayerForTheGamePieceHeWantsUse(whichPlayer);
+            askThePlayerForHisName();
+            askThePlayerForTheSymbolHeWantsUse();
         } else {
             printGreetingForSecondPlayer();
-            askThePlayerForHisName(whichPlayer);
+            askThePlayerForHisName();
             saveSecondPlayerGamePieceInDataBase();
         }
     }
@@ -38,52 +41,54 @@ public class GameGui {
     }
 
     private void printGreetingForSecondPlayer() {
-        System.out.println("Witam drugiego gracza :) ");
+        System.out.println("W takim razie witam drugiego gracza :) ");
     }
 
-    private void askThePlayerForHisName(int whichPlayer) {
+    private void askThePlayerForHisName() {
         System.out.println("Napisz jak mam sie do Ciebie zwracac? ");
-        savePlayerNameInDataBase(whichPlayer);
+        savePlayerNameInDataBase();
     }
 
-    private void askThePlayerForTheGamePieceHeWantsUse(int whichPlayer) {
-        String playerName = gameDataBase.getPlayerName(whichPlayer);
-        System.out.println("Bardzo milo mi Ciebie poznac " + playerName + ". Tak wiec kolejne pytanie" +
-                " jak i przywilej pierwszego gracza ;) Jakim znakiem chcesz zagrac masz do wyboru X lub O ?");
-        savePlayerGamePieceInDataBase(whichPlayer);
+    private void askThePlayerForTheSymbolHeWantsUse() {
+        String playerName = gameDataBase.getPlayerName(FIRST_PLAYER_ON_LIST);
+        System.out.println("Bardzo milo mi Ciebie poznac " + playerName + ". Tak wiec kolejne pytanie," +
+                " jakim symbolem chcesz zagrac, masz do wyboru X lub O ?");
+        saveFirstPlayerSymbolInDataBase();
     }
 
-    private void savePlayerNameInDataBase(int whichPlayer) {
+    private void savePlayerNameInDataBase() {
         inputValidation.takeFromPlayerName();
         String playerName = inputValidation.getApprovedPlayerName();
-        gameDataBase.getPlayerFromList(whichPlayer).setName(playerName);
+        Person player = new Person();
+        player.setName(playerName);
+        gameDataBase.addPlayerToList(player);
     }
 
-    private void savePlayerGamePieceInDataBase(int whichPlayer) {
-        inputValidation.takeFromPlayerHisGamePiece();
-        String gamePiece = inputValidation.getApprovedPlayerGamePiece();
-        gameDataBase.getPlayerFromList(whichPlayer).setGamePiece(gamePiece);
-        gameDataBase.setRound(gamePiece.toUpperCase());
+    private void saveFirstPlayerSymbolInDataBase() {
+        inputValidation.takeFromPlayerHisSymbol();
+        String symbol = inputValidation.getApprovedPlayerSymbol();
+        gameDataBase.getPlayerFromList(FIRST_PLAYER_ON_LIST).setSymbol(symbol);
+        gameDataBase.setSymbolUsedThisRound(symbol.toUpperCase());
     }
 
     private void saveSecondPlayerGamePieceInDataBase() {
-        String firstPlayerGamePiece = gameDataBase.getPlayerGamePiece(1);
-        if (firstPlayerGamePiece.equals("X")) {
-            gameDataBase.getPlayerFromList(1).setGamePiece("O");
-            printInformationForSecondPlayerAboutHisGamePiece(firstPlayerGamePiece, "O");
+        String firstPlayerGamePiece = gameDataBase.getPlayerSymbol(FIRST_PLAYER_ON_LIST);
+        if (firstPlayerGamePiece.equals(SYMBOL_X)) {
+            gameDataBase.getPlayerFromList(SECOND_PLAYER_ON_LIST).setSymbol(SYMBOL_O);
+            printInformationForSecondPlayerAboutHisSymbol(firstPlayerGamePiece, SYMBOL_O);
         } else {
-            gameDataBase.getPlayerFromList(1).setGamePiece("X");
-            printInformationForSecondPlayerAboutHisGamePiece(firstPlayerGamePiece, "X");
+            gameDataBase.getPlayerFromList(SECOND_PLAYER_ON_LIST).setSymbol(SYMBOL_X);
+            printInformationForSecondPlayerAboutHisSymbol(firstPlayerGamePiece, SYMBOL_X);
         }
     }
 
-    private void printInformationForSecondPlayerAboutHisGamePiece(String firstPlayerGamePiece, String secondPlayerGamePiece) {
-        System.out.println("Znakiem pierwszego gracza jest " + firstPlayerGamePiece + " " +
-                "tak wiec zagrasz " + secondPlayerGamePiece);
+    private void printInformationForSecondPlayerAboutHisSymbol(String firstPlayerSymbol, String secondPlayerSymbol) {
+        System.out.println("Symbolem pierwszego gracza jest " + firstPlayerSymbol + " " +
+                "tak wiec zagrasz " + secondPlayerSymbol + ".");
     }
 
     public void askForAnOpponent() {
-        System.out.println("Dobrze wiec z kim chcesz zagrac? Wprowadz jedn z opcji 1 - Gracz, 2 - Komputer");
+        System.out.println("Dobrze wiec z kim chcesz zagrac? Wprowadz jedna z opcji 1 - Gracz, 2 - Komputer");
         saveSelectedOpponentInDataBase();
     }
 
@@ -94,11 +99,10 @@ public class GameGui {
 
     public void answerThePlayerDecisions() {
         if (isPlayerSureAboutOpponent()) {
-            System.out.println("Rozumiem w takim razie pozostalo nam ustalic ostatnia rzecz przed gra i bedzie mozna zaczac zabawe ");
-            gameDataBase.setOpponentHasBeenSelected(isPlayerSureAboutOpponent());
+            gameDataBase.setIsOpponentHasBeenSelected(isPlayerSureAboutOpponent());
         } else {
             System.out.println("W takim razie jeszcze raz spytam ");
-            gameDataBase.setOpponentHasBeenSelected(isPlayerSureAboutOpponent());
+            gameDataBase.setIsOpponentHasBeenSelected(isPlayerSureAboutOpponent());
         }
     }
 
@@ -106,22 +110,23 @@ public class GameGui {
         return inputValidation.getApprovedAnswerYOrN().contains("Y");
     }
 
+    public void printInfoAboutComputer() {
+        System.out.println("""
+                Wiec wybrales komputer jako oponenta nie bedzie latwo.... no ale na razie nie ma\s
+                poziomu trudnosci wiec nie bedzie tak zle ^^ \n""");
+    }
+
     private void saveSelectedOpponentInDataBase() {
         inputValidation.takeFromPlayerSelectedOpponent();
         String selectedOpponent = inputValidation.getApprovedSelectedOpponent();
-        if (selectedOpponent.contains("1")) {
-            gameDataBase.setSelectedOpponent(selectedOpponent);
-        } else {
-            gameDataBase.setSelectedOpponent(selectedOpponent);
-        }
+        gameDataBase.setSelectedOpponent(selectedOpponent);
     }
 
     public void askAboutBoardSize() {
         System.out.println("""
-                W takimi razie prosze teraz zdecydowac o rozmiarze planszy. Nasza plansza zawsze jest w ksztalcie kwadratu,\s
-                wiec nie trudno sie domyslic ze wystarczy podac tylko rozmiar jednego boku abysmy byli w stanie stworzyc dla\s
-                Ciebie plansze :) Wiec na jak duzej planszy chcesz grac? Tylko prosze bez przesady zaluzmy ze nie moze byc\s
-                mniejsza niz 3 (bo to nie mialo by sensu) i nie wieksza niz 20.""");
+                W takimi razie prosze teraz zdecydowac o rozmiarze planszy. Wiec na jak\s
+                duzej planszy chcesz grac? Tylko prosze bez przesady zalozmy, ze nie moze byc\s
+                mniejsza niz 3 (bo to nie mialoby sensu) i nie wieksza niz 20.""");
 
         saveSelectedBoardSizeByPlayerInDataBase();
     }
@@ -132,17 +137,42 @@ public class GameGui {
         gameDataBase.setSelectedBoardSize(selectedBoardSize);
     }
 
+    public void askAboutNumberOfSymbolsInLineToWin() {
+        System.out.println("Skoro juz znamy rozmiar planszy, zapytam jeszcze o to ile znakow w linii, bedzie decydowalo o wygranej w grze\n" +
+                "Zalozmy, ze moze to byc wartosc od 3 (bo to najmniejsza dostepna tablica) do rozmiaru wybranej tablicy.");
+        saveSelectedNumberOfSymbolsInLineToWin();
+    }
+
+    private void saveSelectedNumberOfSymbolsInLineToWin() {
+        int boardSize = gameDataBase.getSelectedBoardSize();
+        inputValidation.takeFromPlayerNumberOfSymbolsInLineToWin(boardSize);
+        int numberOfSymbolsInLineToWin = inputValidation.getApprovedSelectedNumberOfSymbolsInLineToWin();
+        gameDataBase.setNumberOfSymbolsInLineToWin(numberOfSymbolsInLineToWin);
+    }
+
     public void printExplanationOfTheGame() {
         int boardSize = gameDataBase.getSelectedBoardSize();
-        System.out.println("Przy wyborze planszy " + boardSize + "x" + boardSize + " gramy dopuki" +
-                " jeden z graczy nie bedzie mial w rzedzie " + boardSize + " swoich znakow.\nPonierzej " +
-                "widac plansze ktora wybrales. Widac na niej numerki komorek ktore nalerzy wskazac zeby" +
-                " pojawila sie tam Twoj znak.\nNie pozostalo mi nic innego jak rzyczyc Tobie powodzenia " +
+        int numberOfSymbolsInLineToWin = gameDataBase.getNumberOfSymbolsInLineToWin();
+        System.out.println("Przy wyborze planszy " + boardSize + "x" + boardSize + " gramy, dopoki" +
+                " jeden z graczy nie bedzie mial w rzedzie " + numberOfSymbolsInLineToWin + " swoich symboli.\nPonizej " +
+                "widac plansze, ktora wybrales. Widac na niej numerki komorek, ktore nalezy wskazac, zeby" +
+                " pojawila sie tam Twoj znak.\nNie pozostalo mi nic innego jak zyczyc Tobie powodzenia " +
                 ":)\n");
     }
 
+    public void printInfoWhoMakeMove() {
+        String symbolUsedThisRound = gameDataBase.getSymbolUsedThisRound();
+        if (gameDataBase.getPlayerSymbol(FIRST_PLAYER_ON_LIST).equals(symbolUsedThisRound)) {
+            String name = gameDataBase.getPlayerName(FIRST_PLAYER_ON_LIST);
+            System.out.println("ruch wykonuje " + name);
+        } else {
+            String name = gameDataBase.getPlayerName(SECOND_PLAYER_ON_LIST);
+            System.out.println("ruch wykonuje " + name);
+        }
+    }
+
     public void askPlayerToSelectSpaceOnTheBoard() {
-        System.out.println("Prosze wpisz numer komorki gdzie mam ustawic Twoj znak? ");
+        System.out.println("Prosze, wpisz numer komorki gdzie mam ustawic Twoj znak? ");
         saveSelectedSpaceOnTheBoard();
     }
 
@@ -153,10 +183,21 @@ public class GameGui {
         gameDataBase.setSelectedSpaceOnTheBoard(selectedSpaceOnTheBoard);
     }
 
-    public void printInfoThatThisSpaceIsNotEmpty(){
-        System.out.println("Wybacz ale tu znajduje sie juz figura sprobuj wybrac inne miejsce");
+    public void printInfoThatThisSpaceIsNotEmpty() {
+        System.out.println("Wybacz, ale tu znajduje sie juz symbol, sprobuj wybrac inne miejsce.");
     }
 
+    public void printWhoWinGame() {
+        String symbolUsedThisRound = gameDataBase.getSymbolUsedThisRound();
+        if (gameDataBase.getPlayerFromList(FIRST_PLAYER_ON_LIST).getSymbol().equals(symbolUsedThisRound)) {
+            System.out.println("Zwyciezca zostaje " + gameDataBase.getPlayerName(FIRST_PLAYER_ON_LIST));
+        } else {
+            System.out.println("Zwyciezca zostaje " + gameDataBase.getPlayerName(SECOND_PLAYER_ON_LIST));
+        }
+    }
 
+    public void printInfoAboutDraft() {
+        System.out.println("Niestety nie ma juz miejsca na planszy i jednoczesnie nikt nie wygral tak, wiec oglaszam remis");
+    }
 
 }

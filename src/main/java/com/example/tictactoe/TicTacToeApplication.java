@@ -12,10 +12,9 @@ public class TicTacToeApplication {
 
         GameDataBase gameDataBase = new GameDataBase();
         GameGui gameGui = new GameGui(gameDataBase);
-        GameLogic gameLogic = new GameLogic(gameDataBase, gameGui);
+        GameLogic gameLogic = new GameLogic(gameDataBase);
         Board board = new Board(gameDataBase);
 
-/*
         gameGui.printGreeting();
         gameGui.collectNecessaryInformationAboutThePlayer(gameDataBase.getFirst()); // zastanowić się nad nazwą
 
@@ -24,31 +23,55 @@ public class TicTacToeApplication {
             gameGui.askIfPlayerIsSureAboutOpponent();
             gameGui.answerThePlayerDecisions();
         } while (!gameDataBase.isOpponentHasBeenSelected());
-*/
+
+        if (gameLogic.isOpponentAComputer()) {
+            gameGui.printInfoAboutComputer();
+            gameLogic.addComputerAsPlayer();
+        } else {
+            gameGui.collectNecessaryInformationAboutThePlayer(gameDataBase.getSecond());
+        }
+
 
         gameGui.askAboutBoardSize();
         gameLogic.prepareBoardForTheGame();
+        gameGui.askAboutNumberOfSymbolsInLineToWin();
+
         gameGui.printExplanationOfTheGame();
         board.printInstructionBoard();
 
-
+        gameLogic.chooseARandomSymbolThatStarts();
         boolean isEnd;
-        gameDataBase.setRound("X");
+
 
         do {
-
+            gameGui.printInfoWhoMakeMove();
             do {
-                gameGui.askPlayerToSelectSpaceOnTheBoard();
+
+                if (!gameLogic.isComputerMove()) {
+                    gameGui.askPlayerToSelectSpaceOnTheBoard();
+                } else {
+                    gameLogic.chooseSpaceOnBoardForComputer();
+                }
+
                 gameLogic.findSelectedSpaceInBoardArray();
-                if (gameLogic.isSelectedSpaceNotEmpty()) {
+
+                if (gameLogic.isValidMove() && !gameLogic.isComputerMove()) {
                     gameGui.printInfoThatThisSpaceIsNotEmpty();
                 }
 
-            } while (gameLogic.isSelectedSpaceNotEmpty());
+            } while (gameLogic.isValidMove());
 
-            gameLogic.putPlayerFigureOnBoard(gameDataBase.getRound());
+            gameLogic.placeMoveOnBoard(gameDataBase.getSymbolUsedThisRound());
+
             board.printMainBoard();
-            isEnd = gameLogic.isThePlayerWinTheGame();
+            isEnd = gameLogic.isThePlayerWinTheGame() || gameLogic.isADraw();
+
+            if (gameLogic.isThePlayerWinTheGame() && isEnd) {
+                gameGui.printWhoWinGame();
+            }
+            if (gameLogic.isADraw() && isEnd && !gameLogic.isThePlayerWinTheGame()){
+                gameGui.printInfoAboutDraft();
+            }
 
             gameLogic.changeTurn();
         } while (!isEnd);

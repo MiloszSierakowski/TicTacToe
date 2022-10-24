@@ -5,26 +5,23 @@ import java.util.Scanner;
 public class InputValidation {
 
     private final Scanner scanner = new Scanner(System.in);
-    private String gamePiece;
     private String playerName;
+    private String gamePiece;
+    private String selectedOpponent;
+    private String playerAnswerYOrN;
     private String selectedBoardSize;
     private final int MINIMUM_BOARD_SIZE = 3;
     private final int MAXIMUM_BARD_SIZE = 20;
-    private String selectedOpponent;
-    private String playerAnswerYOrN;
+    private String numberOfSymbolsInLineToWin;
     private String selectedSpaceOnTheBoard;
 
-
-    private String getGamePiece() {
-        return gamePiece;
-    }
 
     private String getPlayerName() {
         return playerName;
     }
 
-    private String getSelectedBoardSize() {
-        return selectedBoardSize;
+    private String getGamePiece() {
+        return gamePiece;
     }
 
     private String getSelectedOpponent() {
@@ -34,6 +31,12 @@ public class InputValidation {
     private String getPlayerAnswerYOrN() {
         return playerAnswerYOrN;
     }
+
+    private String getSelectedBoardSize() {
+        return selectedBoardSize;
+    }
+
+    private String getNumberOfSymbolsInLineToWin(){return numberOfSymbolsInLineToWin;}
 
     private String getSelectedSpaceOnTheBoard() {
         return selectedSpaceOnTheBoard;
@@ -54,7 +57,7 @@ public class InputValidation {
         return this.playerName;
     }
 
-    public void takeFromPlayerHisGamePiece() {
+    public void takeFromPlayerHisSymbol() {
         do {
             this.gamePiece = scanner.nextLine();
 
@@ -68,7 +71,7 @@ public class InputValidation {
         return !getGamePiece().matches("[xXoO]*") || getGamePiece().length() != 1;
     }
 
-    public String getApprovedPlayerGamePiece() {
+    public String getApprovedPlayerSymbol() {
         return this.gamePiece.toUpperCase();
     }
 
@@ -131,6 +134,33 @@ public class InputValidation {
         return getSelectedBoardSize();
     }
 
+    public void takeFromPlayerNumberOfSymbolsInLineToWin(int boardSize) {
+        do {
+            this.numberOfSymbolsInLineToWin = scanner.nextLine();
+
+            if (isNumberOfSymbolsInLineToWinIsNotReady(boardSize)) {
+                System.out.println("Wpisana wartosc jest nie poprawna prosze sprobuj jeszcze raz pamietaj wartosc musi miescic\s" +
+                        " sie miedzy " + MINIMUM_BOARD_SIZE + " a " + boardSize + ".");
+            }
+
+        } while (isNumberOfSymbolsInLineToWinIsNotReady(boardSize));
+    }
+    private boolean isNumberOfSymbolsInLineToWinIsNotReady(int boardSize) {
+
+        if (getNumberOfSymbolsInLineToWin().matches("[0-9]*") && getNumberOfSymbolsInLineToWin().length() >= 1) {
+
+            int NumberOfSymbolsInLineToWin = Integer.parseInt(getNumberOfSymbolsInLineToWin());
+
+            return NumberOfSymbolsInLineToWin < MINIMUM_BOARD_SIZE || NumberOfSymbolsInLineToWin > boardSize;
+        }
+        return true;
+    }
+
+    public int getApprovedSelectedNumberOfSymbolsInLineToWin() {
+        return Integer.parseInt(getNumberOfSymbolsInLineToWin());
+    }
+
+
     public void takeFromPlayerSelectedSpaceOnTheBoard(int boardSize) {
         do {
             this.selectedSpaceOnTheBoard = scanner.nextLine();
@@ -154,5 +184,4 @@ public class InputValidation {
     public int getApprovedSelectedSpaceOnTheBoard() {
         return Integer.parseInt(getSelectedSpaceOnTheBoard());
     }
-
 }
